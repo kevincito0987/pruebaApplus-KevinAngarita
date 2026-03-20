@@ -19,7 +19,7 @@ class Product(SQLModel, table=True):
     code: str = Field(sa_column=Column(String(50), unique=True, index=True))
     name: str = Field(sa_column=Column(String(255)))
     price: float
-    category_id: int = Field(foreign_key="category.id")
+    category_id: Optional[int] = Field(default=None, foreign_key="category.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
