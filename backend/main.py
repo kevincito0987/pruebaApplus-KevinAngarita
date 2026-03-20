@@ -5,6 +5,7 @@ from models import Product, Category
 from services import sync_external_api_data
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+from sqlalchemy import text
 
 app = FastAPI(title="Applus K2 API")
 
@@ -60,51 +61,52 @@ def create_product(product: Product, db: Session = Depends(get_session)):
     return product
 
 
-@app.put("/products/{product_id}")
-def update_product(product_id: int, product_data: Product, db: Session = Depends(get_session)):
-    # 1. Buscar el producto actual
-    db_product = db.get(Product, product_id)
+@app.put("/products/code/{product_code}")
+def update_product_by_code(product_code: str, product_data: Product, db: Session = Depends(get_session)):
+    # 1. Buscamos el producto por su código único
+    statement = select(Product).where(Product.code == product_code)
+    db_product = db.exec(statement).first()
+
     if not db_product:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
+        raise HTTPException(
+            status_code=404, detail=f"No existe un producto con el código: {product_code}")
 
-    # 2. Lógica de validación de código (si el código cambia)
-    if product_data.code != db_product.code:
-        statement = select(Product).where(Product.code == product_data.code)
-        exists = db.exec(statement).first()
-        if exists:
-            raise HTTPException(
-                status_code=400, detail="El nuevo código ya está en uso")
-
-    # 3. Actualizar campos
+    # 2. Actualizamos los campos (Excepto el código, que es la llave de búsqueda)
     db_product.name = product_data.name
     db_product.price = product_data.price
-    db_product.code = product_data.code
     db_product.category_id = product_data.category_id
-    db_product.updated_at = datetime.utcnow()  # Actualizamos la estampa de tiempo
+    db_product.updated_at = datetime.utcnow()
 
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
+
     return db_product
 
 
-@app.delete("/products/{product_id}")
-def delete_product(product_id: int, db: Session = Depends(get_session)):
-    # 1. Buscar el producto
-    db_product = db.get(Product, product_id)
+@app.delete("/products/code/{product_code}")
+def delete_product_by_code(product_code: str, db: Session = Depends(get_session)):
+    statement = select(Product).where(Product.code == product_code)
+    db_product = db.exec(statement).first()
 
-    # 2. Si no existe, lanzamos 404
     if not db_product:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
+        raise HTTPException(status_code=404, detail="No encontrado")
 
-    # 3. Eliminar de la sesión y confirmar
     db.delete(db_product)
     db.commit()
 
-    return {"status": "success", "message": f"Producto {product_id} eliminado correctamente"}
+    # --- AQUÍ ESTÁ EL TRUCO ---
+    # Buscamos el ID máximo que quedó en la tabla
+    max_id_query = db.exec(text("SELECT MAX(id) FROM product")).first()
+    max_id = max_id_query[0] if max_id_query[0] is not None else 0
 
-@app.get("/categories")
-def list_categories(db: Session = Depends(get_session)):
-    return db.exec(select(Category)).all()
+    # Reiniciamos el contador de SQL Server para que el siguiente sea max_id + 1
+    db.exec(text(f"DBCC CHECKIDENT ('product', RESEED, {max_id})"))
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"Producto con código [{product_code}] eliminado con éxito."
+    }
 
 # El resto de tus métodos (POST, DELETE) van aquí siguiendo este formato limpio
