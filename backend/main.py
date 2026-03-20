@@ -13,10 +13,9 @@ from database import engine
 
 app = FastAPI(title="Applus K2 API")
 
-# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción pondríamos la URL del front
+    allow_origins=["*"],  # O especifica ["http://localhost:5173"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,19 +25,16 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
-
-    # Ejecutamos el cambio de columna directamente en la DB
     with Session(engine) as session:
         try:
+            # Forzamos la columna a VARCHAR(MAX) para los Base64 largos
             session.exec(
-                text("ALTER TABLE product ALTER COLUMN category_id INT NULL"))
+                text("ALTER TABLE product ALTER COLUMN image VARCHAR(MAX) NULL"))
             session.commit()
-            print("Columna category_id actualizada a NULL con éxito.")
+            print("Columna image actualizada a VARCHAR(MAX)")
         except Exception as e:
-            # Si ya es NULL o la tabla es nueva, fallará silenciosamente
             session.rollback()
-            print(
-                f"Nota: No se pudo alterar la columna (posiblemente ya es NULL): {e}")
+            print(f"Nota: No se pudo alterar la columna image: {e}")
 
 
 @app.get("/sync")
@@ -63,7 +59,6 @@ def list_products(db: Session = Depends(get_session)):
 
 @app.post("/products", status_code=201)
 def create_product(product: Product, db: Session = Depends(get_session)):
-    # Verificamos si el código ya existe para evitar errores de llave duplicada
     statement = select(Product).where(Product.code == product.code)
     existing = db.exec(statement).first()
 
@@ -73,7 +68,6 @@ def create_product(product: Product, db: Session = Depends(get_session)):
 
     db.add(product)
     db.commit()
-    # Esto recupera el ID generado y las fechas por defecto
     db.refresh(product)
     return product
 
@@ -91,6 +85,7 @@ def update_product_by_code(product_code: str, product_data: Product, db: Session
     # 2. Actualizamos los campos (Excepto el código, que es la llave de búsqueda)
     db_product.name = product_data.name
     db_product.price = product_data.price
+    db_product.image = product_data.image
     db_product.category_id = product_data.category_id
     db_product.updated_at = datetime.utcnow()
 
@@ -151,43 +146,33 @@ def get_category_by_id(category_id: int, db: Session = Depends(get_session)):
 
 class CategoryCreate(BaseModel):
     name: str
-    product_ids: Optional[List[int]] = []
+    product_codes: Optional[List[str]] = []
 
 
 @app.post("/categories", status_code=201)
 def create_category(data: CategoryCreate, db: Session = Depends(get_session)):
-    # 1. Crear la categoría
+    # 1. Crear la categoría primero
     new_category = Category(name=data.name)
     db.add(new_category)
     db.commit()
     db.refresh(new_category)
 
-    # 2. Si mandaste IDs, los vinculamos
-    if data.product_ids:
-        statement = select(Product).where(Product.id.in_(data.product_ids))
+    if data.product_codes:
+        # Buscamos los productos cuyos códigos coincidan con los strings enviados
+        statement = select(Product).where(Product.code.in_(data.product_codes))
         products_to_link = db.exec(statement).all()
 
         for prod in products_to_link:
-            prod.category_id = new_category.id
-            prod.updated_at = datetime.utcnow()
-            db.add(prod)
+            prod.category_id = new_category.id  # Asignamos el ID de la nueva categoría
+            db.add(prod)  # Marcamos el producto para actualizar
 
-        db.commit()
-        # REFRESH IMPORTANTE: Esto hace que SQLModel cargue la relación 'products'
+        db.commit()  # Guardamos los cambios en los productos
         db.refresh(new_category)
 
-    # 3. Respuesta con la información detallada
     return {
         "status": "success",
-        "message": "Categoría creada y productos vinculados con éxito",
-        "data": {
-            "id": new_category.id,
-            "name": new_category.name,
-            # <--- Esto cambia el número por la lista de objetos
-            "linked_products": new_category.products
-        }
+        "data": new_category  # Esto ya debería incluir .products si tienes la relación
     }
-    
 
 # Asegúrate de que el esquema espere strings
 class CategoryUpdate(BaseModel):

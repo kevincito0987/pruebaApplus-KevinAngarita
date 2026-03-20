@@ -4,41 +4,52 @@ from models import Product, Category
 
 
 def sync_external_api_data(db: Session):
-    # Consumimos la Fake Store API
-    url = "https://fakestoreapi.com/products"
-    response = requests.get(url)
+    try:
+        # 1. Traer categorías de la API externa
+        cat_response = requests.get(
+            "https://fakestoreapi.com/products/categories")
+        external_categories = cat_response.json()
 
-    if response.status_code == 200:
-        external_products = response.json()
+        for cat_name in external_categories:
+            statement = select(Category).where(Category.name == cat_name)
+            existing_cat = db.exec(statement).first()
+            if not existing_cat:
+                new_cat = Category(name=cat_name)
+                db.add(new_cat)
+        db.commit()
+
+        # 2. Traer productos de la API externa
+        prod_response = requests.get("https://fakestoreapi.com/products")
+        external_products = prod_response.json()
 
         for item in external_products:
-            # 1. Manejo de Categorías
-            category_name = item['category']
-            statement_cat = select(Category).where(
-                Category.name == category_name)
-            db_category = db.exec(statement_cat).first()
+            # Buscamos si el producto ya existe por su código (usamos el ID de la API como code)
+            statement = select(Product).where(Product.code == str(item["id"]))
+            existing_prod = db.exec(statement).first()
 
-            if not db_category:
-                db_category = Category(name=category_name)
-                db.add(db_category)
-                db.commit()
-                db.refresh(db_category)
+            # Buscamos la categoría local para el FK
+            cat_stmt = select(Category).where(
+                Category.name == item["category"])
+            db_category = db.exec(cat_stmt).first()
 
-            # 2. Manejo de Productos (usamos el ID de la API como 'code' único)
-            product_code = str(item['id'])
-            statement_prod = select(Product).where(
-                Product.code == product_code)
-            existing_product = db.exec(statement_prod).first()
-
-            if not existing_product:
+            if not existing_prod:
+                # AQUÍ ES DONDE SUCEDE LA MAGIA
                 new_product = Product(
-                    code=product_code,
-                    name=item['title'],
-                    price=float(item['price']),
-                    category_id=db_category.id
+                    code=str(item["id"]),
+                    name=item["title"],
+                    price=float(item["price"]),
+                    image=item["image"],  # <--- ESTA LÍNEA ES CLAVE
+                    category_id=db_category.id if db_category else None
                 )
                 db.add(new_product)
+            else:
+                # Si ya existe, actualizamos la imagen por si acaso cambió
+                existing_prod.image = item["image"]
+                existing_prod.price = float(item["price"])
+                db.add(existing_prod)
 
         db.commit()
         return True
-    return False
+    except Exception as e:
+        print(f"Error en la sincronización: {e}")
+        return False

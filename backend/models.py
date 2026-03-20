@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from sqlmodel import SQLModel, Field, Relationship, Column, String
+from sqlmodel import SQLModel, Field, Relationship, Column, String, Text
 
 
 class Category(SQLModel, table=True):
@@ -15,10 +15,10 @@ class Category(SQLModel, table=True):
 
 class Product(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    # Aquí es donde fallaba: le damos un tamaño de 50 caracteres al código único
     code: str = Field(sa_column=Column(String(50), unique=True, index=True))
     name: str = Field(sa_column=Column(String(255)))
     price: float
+    image: Optional[str] = Field(default=None, sa_column=Column(Text))
     category_id: Optional[int] = Field(default=None, foreign_key="category.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
