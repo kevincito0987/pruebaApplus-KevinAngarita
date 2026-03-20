@@ -1,12 +1,12 @@
 # ⚙️ Applus+ K2 - Backend API (FastAPI)
 
-[cite_start]Este módulo constituye el núcleo de procesamiento de la prueba técnica para **Applus+**. [cite: 57, 59] [cite_start]Se trata de una REST API construida con **FastAPI** que implementa un patrón de diseño **MVC** (Modelo-Vista-Controlador) para gestionar productos y categorías en un entorno de contenedores. [cite: 59, 60]
+Este módulo constituye el núcleo de procesamiento de la prueba técnica para **Applus+**. Se trata de una REST API construida con **FastAPI** que implementa un patrón de diseño **MVC** (Modelo-Vista-Controlador) para gestionar productos y categorías en un entorno de contenedores. [cite: 59, 60]
 
 ## 🛠️ Stack Tecnológico
 
-* [cite_start]**Framework:** [FastAPI](https://fastapi.tiangolo.com/) (Python 3.12). [cite: 59]
+* **Framework:** [FastAPI](https://fastapi.tiangolo.com/) (Python 3.12). 
 * **ORM:** [SQLModel](https://sqlmodel.tiangolo.com/) (Basado en SQLAlchemy y Pydantic).
-* [cite_start]**Base de Datos:** Microsoft SQL Server 2022 (vía `pyodbc` y `msodbcsql18`). [cite: 59]
+* **Base de Datos:** Microsoft SQL Server 2022 (vía `pyodbc` y `msodbcsql18`).
 * **Servidor ASGI:** [Uvicorn](https://www.uvicorn.org/).
 
 ## 🏗️ Arquitectura de Software (MVC)
@@ -14,7 +14,7 @@
 El backend está organizado de forma modular para garantizar escalabilidad y limpieza:
 
 * `main.py`: Punto de entrada de la aplicación y definición de rutas (Controller).
-* [cite_start]`models.py`: Definición de las entidades `Product` y `Category` con sus respectivas relaciones y estampas de tiempo. [cite: 61, 65, 70, 71]
+* `models.py`: Definición de las entidades `Product` y `Category` con sus respectivas relaciones y estampas de tiempo.
 * `database.py`: Configuración de la conexión y motor de SQL Server utilizando variables de entorno.
 * `services.py`: Lógica de negocio para la sincronización de datos con APIs externas.
 
@@ -38,10 +38,10 @@ Al trabajar dentro de un **Dev Container**, el driver de SQL Server ya está pre
 ## 🔌 Endpoints Principales
 
 * `GET /docs`: Documentación interactiva (Swagger UI).
-* [cite_start]`GET /products`: Listado completo de productos. [cite: 72]
-* [cite_start]`POST /products`: Creación de nuevos productos con validación de código único. [cite: 66, 73]
+* `GET /products`: Listado completo de productos. [cite: 72]
+* `POST /products`: Creación de nuevos productos con validación de código único. [cite: 66, 73]
 * `GET /sync`: Servicio de sincronización que persiste datos externos en SQL Server.
-* [cite_start]`DELETE /products/{id}`: Eliminación de productos. [cite: 75]
+* `DELETE /products/{id}`: Eliminación de productos. [cite: 75]
 
 ---
 
