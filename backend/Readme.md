@@ -34,14 +34,30 @@ Al trabajar dentro de un **Dev Container**, el driver de SQL Server ya está pre
     ```bash
     uvicorn main:app --reload --host 0.0.0.0 --port 8000
     ```
+## 🔄 Origen de Datos y Sincronización
+
+Para poblar el sistema inicialmente y demostrar las capacidades de integración, este backend consume datos de una fuente externa:
+
+- **API de Referencia:** [Fake Store API](https://fakestoreapi.com/)
+- **Endpoint utilizado:** `https://fakestoreapi.com/products`
+
+**Proceso de Integración:**
+
+1. **Consumo:** El backend realiza peticiones asíncronas a la API externa para obtener el catálogo de productos.
+2. **Transformación:** Los datos se mapean al esquema de **SQLModel** definido en `models.py`.
+3. **Persistencia:** La lógica en `services.py` se encarga de insertar estos datos en la base de datos **Microsoft SQL Server**.
+4. **Operatividad:** Una vez que los datos residen en la base de datos local, el sistema habilita el ciclo de vida completo (**CRUD**), permitiendo crear, editar, listar y eliminar productos de forma independiente a la API original.
+
 
 ## 🔌 Endpoints Principales
 
 * `GET /docs`: Documentación interactiva (Swagger UI).
-* `GET /products`: Listado completo de productos. [cite: 72]
-* `POST /products`: Creación de nuevos productos con validación de código único. [cite: 66, 73]
-* `GET /sync`: Servicio de sincronización que persiste datos externos en SQL Server.
-* `DELETE /products/{id}`: Eliminación de productos. [cite: 75]
+* `GET /products`: Listado y gestión de productos.
+* `GET /categories`: Gestión completa de categorías (CRUD).
+* `GET /sync`: Servicio de sincronización con Fake Store API.
+* `POST /categories`: Creación de categorías con vinculación opcional.
+* `PUT /categories/{id}`: Actualización de nombres de categorías.
+* `DELETE /categories/{id}`: Eliminación lógica/física de categorías.
 
 ---
 
