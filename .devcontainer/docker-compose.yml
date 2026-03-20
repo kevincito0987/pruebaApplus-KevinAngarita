@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ../
+      dockerfile: .devcontainer/Dockerfile
+    container_name: fast-react-dev-container
+    env_file: ./.env
+    ports:
+      - "${BACKEND_PORT}:8000"  # FastAPI
+      - "${FRONTEND_PORT}:5173" # React (Vite)
+    volumes:
+      - ../..:/workspaces:cached
+    depends_on:
+      - sqlserver_db
+    command: sleep infinity
+    networks:
+      - dev_network
+
+  sqlserver_db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver_db
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${SQL_PASSWORD}
+      MSSQL_PID: "Developer"
+    ports:
+      - "${SQL_PORT}:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - dev_network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  dev_network:

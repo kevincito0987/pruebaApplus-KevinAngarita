@@ -1,0 +1,24 @@
+{
+	"name": "FastAPI + React + SQL Server",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"python.defaultInterpreterPath": "/usr/local/bin/python"
+			},
+			"extensions": [
+				"ms-python.python",              // Python
+				"ms-python.vscode-pylance",      // IntelliSense Python
+				"ms-python.debugpy",             // Debugger
+				"dbaeumer.vscode-eslint",        // React Linting
+				"esbenp.prettier-vscode",        // Formateo
+				"bradlc.vscode-tailwindcss",     // Tailwind CSS
+				"cweijan.vscode-database-client2" // Cliente DB para SQL Server
+			]
+		}
+	},
+	"forwardPorts": [8000, 5173, 1433]
+}
