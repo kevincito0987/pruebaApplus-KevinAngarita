@@ -1,6 +1,6 @@
 # 🎨 Applus+ K2 - Frontend (Product Management)
 
-Este módulo contiene la interfaz de usuario desarrollada para la gestión de productos y categorías, cumpliendo con los requerimientos técnicos de la prueba de entrada[cite: 3]. Se ha priorizado la velocidad de desarrollo y una experiencia de usuario fluida (UX) utilizando las herramientas más modernas del ecosistema React.
+[cite_start]Este módulo contiene la interfaz de usuario desarrollada para la gestión de productos y categorías, cumpliendo con los requerimientos técnicos de la prueba de entrada[cite: 3]. Se ha priorizado la velocidad de desarrollo y una experiencia de usuario fluida (UX) utilizando las herramientas más modernas del ecosistema React.
 
 ## 🚀 Stack Tecnológico
 
