@@ -14,17 +14,13 @@ Este repositorio contiene la solución a la prueba técnica para la posición de
 
   
 
-- 
-
-  **Base de Datos:** **SQL Server**.
+- **Base de Datos:** **SQL Server**.
 
   
 
   
 
-- 
-
-  **Frontend:** **React** con TypeScript y Tailwind CSS.
+- **Frontend:** **React** con TypeScript y Tailwind CSS.
 
   
 
@@ -38,33 +34,25 @@ El sistema permite realizar las siguientes operaciones sobre las entidades **Cat
 
 
 
-1. 
-
-   **Listar productos**.
+1. **Listar productos**.
 
    
 
    
 
-2. 
-
-   **Crear productos** con validación de código único.
+2. **Crear productos** con validación de código único.
 
    
 
    
 
-3. 
-
-   **Editar productos** existentes.
+3. **Editar productos** existentes.
 
    
 
    
 
-4. 
-
-   **Eliminar productos** con confirmación obligatoria del usuario.
+4. **Eliminar productos** con confirmación obligatoria del usuario.
 
    
 
@@ -74,17 +62,13 @@ Entidades:
 
 
 
-- 
-
-  **Category:** `name`, `createdAt`, `updatedAt`.
+- **Category:** `name`, `createdAt`, `updatedAt`.
 
   
 
   
 
-- 
-
-  **Product:** `code` (único), `name`, `category` (relación), `price`, `createdAt`, `updatedAt`.
+- **Product:** `code` (único), `name`, `category` (relación), `price`, `createdAt`, `updatedAt`.
 
   
 
@@ -96,7 +80,20 @@ Entidades:
 
 
 
-**Problema:** El query original no mostraba los departamentos que no tenían empleados asignados debido a que la cláusula `WHERE` filtraba los valores `NULL` resultantes del `LEFT JOIN`.
+**Problema:** Tenemos dos tablas: Departments y Employees. Queremos un reporte que muestre
+todos los departamentos, incluso aquellos que actualmente no tienen empleados
+asignados. Sin embargo, el siguiente query no está mostrando los departamentos
+vacíos.
+
+```
+SELECT 
+    d.DepartmentName,
+    e.FirstName,
+    e.LastName
+FROM Departments d
+LEFT JOIN Employees e ON d.DepartmentID = e.DepartmentID 
+WHERE e.IsActive = 1;
+```
 
 Corrige el query para que muestre todos los departamentos (incluso los vacíos).
 
