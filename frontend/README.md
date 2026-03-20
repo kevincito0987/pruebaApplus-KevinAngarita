@@ -2,6 +2,10 @@
 
 Este módulo contiene la interfaz de usuario desarrollada para la gestión de productos y categorías, cumpliendo con los requerimientos técnicos de la prueba de entrada[cite: 3]. Se ha priorizado la velocidad de desarrollo y una experiencia de usuario fluida (UX) utilizando las herramientas más modernas del ecosistema React.
 
+## 🎨 Diseño y UX
+El concepto visual y la interfaz de usuario (UI) se basaron en el siguiente recurso de la comunidad de Figma, adaptando el estilo "Dark Mode" para dispositivos de gestión:
+* **Referencia de Diseño:** [Food POS - Dark Tablet Device](https://www.figma.com/community/file/944188956363619079/food-pos-dark-tablet-device)
+
 ## 🚀 Stack Tecnológico
 
 * **Framework:** [React 19](https://react.dev/) con **TypeScript**.
