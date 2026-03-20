@@ -98,26 +98,32 @@ Entidades:
 
 **Problema:** El query original no mostraba los departamentos que no tenían empleados asignados debido a que la cláusula `WHERE` filtraba los valores `NULL` resultantes del `LEFT JOIN`.
 
+Corrige el query para que muestre todos los departamentos (incluso los vacíos).
 
+#### ✅ Query Corregido (Solución)
 
-**Query Corregido:** Para solucionar esto, debemos mover la condición de actividad del empleado al `ON` del join o validar los nulos en el `WHERE`.
-
-
+Para mantener todos los departamentos (incluso los vacíos) y filtrar solo a los empleados activos, la condición debe formar parte de la unión (`JOIN`):
 
 SQL
 
 ```
 SELECT 
-    d.DepartmentName, 
-    e.FirstName, 
+    d.DepartmentName,
+    e.FirstName,
     e.LastName
 FROM Departments d
 LEFT JOIN Employees e 
     ON d.DepartmentID = e.DepartmentID 
-    AND e.IsActive = 1; -- Se filtra aquí para no perder los departamentos vacíos
+    AND e.IsActive = 1;
 ```
 
-------
+## 💡 Análisis de la Solución
+
+1. **Uso de LEFT JOIN:** Asegura que la tabla de la izquierda (`Departments`) sea la base del resultado, manteniendo todos sus registros.
+2. **Condición en el ON:** Al mover `e.IsActive = 1` al `ON`, el filtro aplica únicamente a la tabla de la derecha (`Employees`) durante el proceso de emparejamiento. Si un empleado no es activo, simplemente no se une, dejando los campos como `NULL`, pero **sin eliminar** la fila del departamento.
+3. **Resultado:** Se obtiene un reporte íntegro con la lista completa de departamentos y el detalle de sus colaboradores activos.
+
+
 
 ## 🚀 Instalación y Uso
 
